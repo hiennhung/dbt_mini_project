@@ -1,0 +1,74 @@
+version: 2
+ 
+models:
+  - name: fact_order_summary
+    description: Fact table containing order summary data with comprehensive metrics
+    config:
+      tags: ['critical', 'mart', 'fact']
+    # data_tests:
+      # - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+      #     column_A: DWH_UPDATED_ON
+      #     column_B: DWH_CREATED_ON
+      # - no_impact_rowcnt
+      # - no_impact_col:
+      #     unique_key: ORDER_ID
+      #     timestamp_column_list: ['DWH_UPDATED_ON','DWH_CREATED_ON']
+ 
+    columns:
+      - name: ORDER_ID
+        description: "Unique identifier for each order"
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_unique
+          - dbt_expectations.expect_column_values_to_not_be_null
+ 
+      # - name: CUSTOMER_ID
+      #   description: "Customer identifier"
+      #   data_tests:
+      #     - dbt_expectations.expect_column_values_to_not_be_null
+      #     - dbt_utils.relationships_where:
+      #         to: ref('hist_customer_snap')
+      #         field: CUSTOMER_ID
+      #         to_condition: iscurrent = 1
+ 
+      - name: ORDER_TOTAL_AMOUNT
+        description: "Total order amount"
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: '> 0'
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.01
+              max_value: 1000000
+              config:
+                severity: warn
+ 
+      - name: TOTAL_ITEMS_COUNT
+        description: "Total number of items in the order"
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: '>= 0 or TOTAL_ITEMS_COUNT is null'
+ 
+      # - name: REVENUE_CATEGORY
+      #   description: "Revenue category classification"
+      #   data_tests:
+      #     - dbt_expectations.expect_column_values_to_be_in_set:
+      #         value_set: ['HIGH', 'MEDIUM', 'LOW', 'VERY_LOW']
+ 
+      # - name: ORDER_SIZE_CATEGORY
+      #   description: "Order size category"
+      #   data_tests:
+      #     - dbt_expectations.expect_column_values_to_be_in_set:
+      #         value_set: ['LARGE', 'MEDIUM', 'SMALL', 'SINGLE']
+ 
+      # - name: DWH_CREATED_ON
+      #   description: "Data warehouse creation timestamp"
+      #   data_tests:
+      #     - dbt_expectations.expect_row_values_to_have_recent_data:
+      #         datepart: day
+      #         interval: 7
+ 
+      # - name: DWH_UPDATED_ON
+      #   description: "Data warehouse last update timestamp"
+      #   data_tests:
+      #     - dbt_expectations.expect_row_values_to_have_recent_data:
+      #         datepart: day
+      #         interval: 2
