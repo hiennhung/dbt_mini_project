@@ -14,7 +14,7 @@ jobs:
  
   # Set the environment variables needed for the run
     env:
-      DBT_URL: "https://cloud.getdbt.com"
+      DBT_URL: "https://if991.us1.dbt.com"
       DBT_ACCOUNT_ID:  ${{ vars.DBT_ACCOUNT_ID }}
       DBT_PROJECT_ID:  ${{ vars.DBT_PROJECT_ID }}
       DBT_PR_JOB_ID:   ${{ vars.DBT_NONPROD_CI_JOB_ID }}
