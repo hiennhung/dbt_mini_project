@@ -1,3 +1,11 @@
+
+{{ config(
+    materialized='view',
+    schema='IM',
+    alias='vw_summary',
+    override_schema=True 
+) }}
+
 SELECT
     CUSTOMER_ID,
     COUNT(*) AS TOTAL_ORDERS,

@@ -3,7 +3,10 @@
 {{ config(
     materialized='incremental',
     unique_key='order_id',
-    incremental_strategy = 'merge'
+    incremental_strategy = 'merge',
+    schema = 'IM',
+    override_schema=True 
+
 ) }}
  
 WITH order_data AS (

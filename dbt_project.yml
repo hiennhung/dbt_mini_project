@@ -36,6 +36,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   dbt_mini_project:
-    # Applies to all files under models/example/
-    example:
-      +materialized: table
+    +schema: HISTORY_SOURCES   
+    mart:
+      +schema: IM
+
