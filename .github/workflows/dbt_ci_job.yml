@@ -10,7 +10,7 @@ jobs:
   # the job calls the dbt Cloud API to run a job
   run_dbt_cloud_job:
     name: run dbt CI Cloud job on NONPROD
-    runs-on: CAI-Enterprise
+    runs-on: ubuntu-latest
  
   # Set the environment variables needed for the run
     env:

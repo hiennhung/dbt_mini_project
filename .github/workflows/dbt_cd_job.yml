@@ -18,7 +18,7 @@ jobs:
   run_dbt_cloud_CI_job:
     if: ${{ inputs.dbt_environment == 'prod' }}
     name: Run dbt CI Cloud Job
-    runs-on: CAI-Enterprise
+    runs-on: ubuntu-latest
  
   # Set the environment variables needed for the run
     env:
