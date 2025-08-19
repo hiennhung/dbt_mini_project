@@ -1,0 +1,31 @@
+# version: 2
+ 
+# models:
+#   - name: vw_summary
+#     description: Customer analytics view with comprehensive metrics
+#     config:
+#       tags: ['semantic_view', 'analytics']
+#     columns:
+#       # - name: CUSTOMER_ID
+#       #   description: "Unique customer identifier"
+#       #   data_tests:
+#       #     - dbt_expectations.expect_column_values_to_be_unique
+#       #     - dbt_expectations.expect_column_values_to_not_be_null
+ 
+#       - name: TOTAL_ORDERS
+#         description: "Total number of orders for the customer"
+#         data_tests:
+#           - dbt_utils.expression_is_true:
+#               expression: '> 0'
+ 
+#       - name: TOTAL_SPENT
+#         description: "Total amount spent by customer"
+#         data_tests:
+#           - dbt_utils.expression_is_true:
+#               expression: '> 0'
+ 
+#       # - name: CUSTOMER_TIER
+#       #   description: "Customer tier classification"
+#       #   data_tests:
+#       #     - dbt_expectations.expect_column_values_to_be_in_set:
+#       #         value_set: ['VIP', 'PREMIUM', 'REGULAR', 'BASIC']
