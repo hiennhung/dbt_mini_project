@@ -1,0 +1,111 @@
+name: run dbt Deploy Cloud job
+ 
+# This filter says only run this job when there is a push to the main branch
+# This works off the assumption that you've restricted this branch to only all PRs to push to the default branch
+# Update the name to match the name of your default branch
+on:
+  workflow_dispatch:
+    inputs:
+      dbt_environment:
+        type: environment
+        default: nonprod
+        description: Deploy to dbt
+      crq_description:
+        type: string
+        description: Change request description
+ 
+jobs:
+  run_dbt_cloud_CI_job:
+    if: ${{ inputs.dbt_environment == 'prod' }}
+    name: Run dbt CI Cloud Job
+    runs-on: CAI-Enterprise
+ 
+  # Set the environment variables needed for the run
+    env:
+      DBT_URL: "https://cloud.getdbt.com"
+      DBT_ACCOUNT_ID:  ${{ vars.DBT_ACCOUNT_ID }}
+      DBT_PROJECT_ID:  ${{ vars.DBT_PROJECT_ID }}
+      DBT_PR_JOB_ID:   ${{ vars.DBT_PROD_CI_JOB_ID }}
+      DBT_API_KEY: ${{ secrets.DBT_API_KEY }}
+      DBT_JOB_CAUSE: 'GitHub Pipeline CI Job'
+      DBT_JOB_BRANCH: ${{ github.ref_name }}
+      DBT_JOB_SCHEMA_OVERRIDE: 'DBT_CI_JOB_${{github.run_number}}'
+ 
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.9"
+      - name: Run dbt Cloud job
+        run: "python scripts/run_and_monitor_dbt_job.py"
+  run_dbt_cloud_CD_job:
+    needs: run_dbt_cloud_CI_job
+    if: ${{ always() && (needs.run_dbt_cloud_CI_job.result == 'skipped' || needs.run_dbt_cloud_CI_job.result == 'success') }}
+    name: Run dbt Deploy Cloud Job
+    runs-on: CAI-Enterprise
+    environment:
+      name: ${{ inputs.dbt_environment }}
+ 
+  # Set the environment variables needed for the run
+    env:
+      DBT_URL: "https://cloud.getdbt.com"
+      DBT_ACCOUNT_ID:  ${{ vars.DBT_ACCOUNT_ID }}
+      DBT_PROJECT_ID:  ${{ vars.DBT_PROJECT_ID }}
+      DBT_PR_JOB_ID:   ${{ vars.DBT_CD_JOB_ID }}
+      DBT_API_KEY: ${{ secrets.DBT_API_KEY }}
+      DBT_JOB_CAUSE: 'GitHub Pipeline Deploy Job'
+      DBT_JOB_BRANCH: ${{ github.ref_name }}
+ 
+    steps:
+      # - name: Deployment start and end
+      #   id: deployment-dates
+      #   run: |
+      #     # Start time is now
+      #     echo "start_date=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+      #     # End time is now + 1hr (use -v "1h" on MacOS, --date="1 hour" on Linux)
+      #     echo "end_date=$(date --date="1 hour" +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+ 
+      # - name: Create change request
+      #   if: ${{ inputs.dbt_environment == 'prod' }}
+      #   id: create-change-request
+      #   uses: cai-actions/change-request-create@v1
+      #   with:
+      #     primary_ci_number: #TBD
+      #     short_description: ${{ inputs.crq_description }}
+      #     description: ${{ inputs.crq_description }}
+      #     assignment_group: "LOG - Supernova"
+      #     start_date: ${{ steps.deployment-dates.outputs.start_date }}
+      #     end_date: ${{ steps.deployment-dates.outputs.end_date }}
+ 
+      # - name: Add work notes to CRQ
+      #   if: ${{ inputs.dbt_environment == 'prod' }}
+      #   id: add-work-note
+      #   uses: cai-actions/change-request-add-worknote@v1
+      #   with:
+      #     change_request_number: ${{ steps.create-change-request.outputs.change_number }}
+      #     worknote_text: The owner of this CRQ is ${{ github.event.pusher.email }}
+ 
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.9"
+      - name: Run dbt Cloud job
+        run: "python scripts/run_and_monitor_dbt_job.py"
+ 
+      # - name: Close CRQ with "Successful" on Job Success
+      #   if: ${{ success() && inputs.dbt_environment == 'prod' }}
+      #   id: close-crq-success
+      #   uses: cai-actions/change-request-close@v1
+      #   with:
+      #     change_request_number: ${{ steps.create-change-request.outputs.change_number }}
+      #     close_code: Successful
+      #     close_note_text: Successful
+ 
+      # - name: Close CRQ with "CICD - Failed" on Job Failure
+      #   if: ${{ failure() && steps.create-change-request.outcome == 'success' && inputs.dbt_environment == 'prod'}}
+      #   id: close-crq-failure
+      #   uses: cai-actions/change-request-close@v1
+      #   with:
+      #     change_request_number: ${{ steps.create-change-request.outputs.change_number }}
+      #     close_code: CICD - Failed
+      #     close_note_text: CICD - Failed
