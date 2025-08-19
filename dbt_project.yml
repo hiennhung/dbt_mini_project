@@ -35,8 +35,9 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 
 models:
-  dbt_mini_project:
-    +schema: HISTORY_SOURCES   
+  dbt_mini_project:  
+    staging:
+      +schema: HISTORY_SOURCES
     mart:
       +schema: IM
 
