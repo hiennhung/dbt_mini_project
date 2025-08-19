@@ -10,11 +10,11 @@ jobs:
   # the job calls the dbt Cloud API to run a job
   run_dbt_cloud_job:
     name: run dbt CI Cloud job on NONPROD
-    runs-on: CAI-Enterprise
+    runs-on: ubuntu-latest
  
   # Set the environment variables needed for the run
     env:
-      DBT_URL: "https://cloud.getdbt.com"
+      DBT_URL: "https://if991.us1.dbt.com"
       DBT_ACCOUNT_ID:  ${{ vars.DBT_ACCOUNT_ID }}
       DBT_PROJECT_ID:  ${{ vars.DBT_PROJECT_ID }}
       DBT_PR_JOB_ID:   ${{ vars.DBT_NONPROD_CI_JOB_ID }}
@@ -28,5 +28,19 @@ jobs:
       - uses: "actions/setup-python@v5"
         with:
           python-version: "3.9"
+      - name: Debug environment variables
+        run: |
+          echo "ACCOUNT: $DBT_ACCOUNT_ID"
+          echo "PROJECT: $DBT_PROJECT_ID"
+          echo "JOB ID: $DBT_PR_JOB_ID"
+          echo "SCHEMA: $DBT_JOB_SCHEMA_OVERRIDE"
+          echo "BRANCH: $DBT_JOB_BRANCH"
+
+      - name: Check Python version
+        run: python --version
+
+      - name: Check script file exists
+        run: ls -al scripts/
+
       - name: Run dbt Cloud job
         run: "python scripts/run_and_monitor_dbt_job.py"
