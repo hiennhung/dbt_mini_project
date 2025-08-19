@@ -28,5 +28,19 @@ jobs:
       - uses: "actions/setup-python@v5"
         with:
           python-version: "3.9"
+      - name: Debug environment variables
+        run: |
+          echo "ACCOUNT: $DBT_ACCOUNT_ID"
+          echo "PROJECT: $DBT_PROJECT_ID"
+          echo "JOB ID: $DBT_PR_JOB_ID"
+          echo "SCHEMA: $DBT_JOB_SCHEMA_OVERRIDE"
+          echo "BRANCH: $DBT_JOB_BRANCH"
+
+      - name: Check Python version
+        run: python --version
+
+      - name: Check script file exists
+        run: ls -al scripts/
+
       - name: Run dbt Cloud job
         run: "python scripts/run_and_monitor_dbt_job.py"
